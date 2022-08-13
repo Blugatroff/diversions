@@ -137,7 +137,7 @@ OVERRIDES = {
             end,
             [PAUSE_BREAK] = function(value)
                 if KEYS_DOWN[CORSAIR][L_CTRL] then
-                    reload()
+                    diversion.reload()
                 else
                     send_event(EV_KEY, PAUSE_BREAK, value)
                 end

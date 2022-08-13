@@ -1,3 +1,5 @@
+local diversion = require 'diversion'
+
 function create_sequence(keys, action)
     local i = 1
     local starting_key_pressed = false
@@ -58,8 +60,8 @@ local driver = function(sequences)
         local function revert()
             for i = 1, #suspended do
                 local k = suspended[i]
-                send_event(EV_KEY, k.code, k.value)
-                send_event(EV_KEY, k.code, k.value)
+                diversion.send_event(EV_KEY, k.code, k.value)
+                diversion.send_event(EV_KEY, k.code, k.value)
             end
             suspended = {}
         end
