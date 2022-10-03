@@ -11,6 +11,8 @@ local send_event = diversion.send_event
 
 KEYS_DOWN = {}
 
+rev_mouse = false
+
 function notify_send(msg)
     execute("notify-send", { msg }):next(function(output) 
         print(output.stdout) 
@@ -149,13 +151,21 @@ OVERRIDES = {
             [X_AXIS] = function(value)
                 if KEYS_DOWN[CORSAIR][L_PIPE] and KEYS_DOWN[CORSAIR][Z] then
                 else
-                    send_event(EV_REL, X_AXIS, value)
+                    if rev_mouse then
+                        send_event(EV_REL, X_AXIS, -value)
+                    else
+                        send_event(EV_REL, X_AXIS, value)
+                    end
                 end
             end,
             [Y_AXIS] = function(value)
                 if KEYS_DOWN[CORSAIR][L_PIPE] and KEYS_DOWN[CORSAIR][X] then
                 else
-                    send_event(EV_REL, Y_AXIS, value)
+                    if rev_mouse then
+                        send_event(EV_REL, Y_AXIS, -value)
+                    else
+                        send_event(EV_REL, Y_AXIS, value)
+                    end
                 end
             end,
             [WHEEL_PIXEL] = function(value)
@@ -188,10 +198,13 @@ local vol_down_seq = key_sequence.create({ G, J }, function()
         send_event(EV_KEY, VOL_DOWN, 0)
     end
 end)
-
+local rev_mouse_toggle_seq = key_sequence.create({ R, E, V }, function()
+    rev_mouse = not rev_mouse
+end)
 local sequences = {
-    [CORSAIR] = { vol_down_seq, vol_up_seq },
+    [CORSAIR] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq },
 }
+
 local sequence_driver = key_sequence.driver(sequences)
 local function on_event(device, ty, code, value)
     local keys_down = KEYS_DOWN[device]

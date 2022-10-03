@@ -62,8 +62,13 @@ local function change_sink_volume(name, change, sinks)
     end)
 end
 
+local function slice(src, start, eend)
+    return table.move(src, start, eend, 1, {})
+end
+
 return {
     change_sink_volume = change_sink_volume,
     split = split,
+    slice = slice,
 }
 
