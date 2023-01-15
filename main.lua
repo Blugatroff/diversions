@@ -198,7 +198,7 @@ local vol_down_seq = key_sequence.create({ G, J }, function()
         send_event(EV_KEY, VOL_DOWN, 0)
     end
 end)
-local rev_mouse_toggle_seq = key_sequence.create({ R, E, V }, function()
+local rev_mouse_toggle_seq = key_sequence.create({ R_ALT, R, E }, function()
     rev_mouse = not rev_mouse
 end)
 local sequences = {
@@ -209,6 +209,7 @@ local sequence_driver = key_sequence.driver(sequences)
 local function on_event(device, ty, code, value)
     local keys_down = KEYS_DOWN[device]
     if ty == EV_KEY then
+        print(code)
         keys_down[code] = value ~= 0
     end
     if keys_down[INSERT] then
