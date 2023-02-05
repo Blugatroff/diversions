@@ -209,7 +209,6 @@ local sequence_driver = key_sequence.driver(sequences)
 local function on_event(device, ty, code, value)
     local keys_down = KEYS_DOWN[device]
     if ty == EV_KEY then
-        print(code)
         keys_down[code] = value ~= 0
     end
     if keys_down[INSERT] then
