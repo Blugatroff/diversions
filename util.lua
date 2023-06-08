@@ -66,9 +66,14 @@ local function slice(src, start, eend)
     return table.move(src, start, eend, 1, {})
 end
 
+function notify_send(msg)
+    execute("notify-send", { msg })
+end
+
 return {
     change_sink_volume = change_sink_volume,
     split = split,
     slice = slice,
+    notify_send = notify_send
 }
 
