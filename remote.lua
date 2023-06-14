@@ -18,6 +18,7 @@ local function connect(remote, on_close)
     )
 
     return function(ty, code, value)
+        print(ty, code, value)
         local bytes = string.pack("HHhB", ty, code, value, 255)
         send_remote(bytes)
     end

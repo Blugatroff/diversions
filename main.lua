@@ -214,9 +214,12 @@ local sequences = {
 local send_to_remote = nil
 local use_remote = false
 local sequence_driver = key_sequence.driver(sequences)
-local function on_event(device, ty, code, value)
+local function on_event(device, ty, code, value, from_remote)
     local keys_down = KEYS_DOWN[device]
-    if ty == EV_KEY and code == R_CTRL and value == 1 and keys_down[L_CTRL] then
+    if not from_remote and ty == EV_KEY and (
+        (code == R_CTRL and value == 1 and keys_down[L_CTRL] ) or 
+        (code == L_CTRL and value == 1 and keys_down[R_CTRL] ))
+    then
         if use_remote then
             use_remote = false
         else
@@ -262,12 +265,12 @@ function listen_for_connection()
     print("listening on port " .. port)
     diversion.spawn(
         "nc",
-        { "-l", tostring(port) },
+        { "-l", "-p", tostring(port) },
         function(data)
             for block in util.split(remaining .. data, separator) do
                 if block:len() == 6 then
                     local ty, code, value = string.unpack("HHh", block)
-                    on_event(KEYBOARD, ty, code, value)
+                    on_event(KEYBOARD, ty, code, value, true)
                     diversion.send_event(EV_SYN, 0, 0)
                 else
                     remaining = block
