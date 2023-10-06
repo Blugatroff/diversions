@@ -5,7 +5,6 @@ local Promise = require 'promise'
 local key_sequence = require 'key_sequence'
 local diversion = require 'diversion'
 local util = require 'util'
-local remote = require('remote')
 
 local execute = diversion.execute
 local send_event = diversion.send_event
@@ -22,7 +21,7 @@ end)
 
 KEYS_DOWN = {}
 
-rev_mouse = false
+rev_mouse = true
 
 function create_mouse_callback(device, key, axis, direction)
     return function(value)
@@ -211,31 +210,9 @@ local sequences = {
     [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq },
 }
 
-local send_to_remote = nil
-local use_remote = false
 local sequence_driver = key_sequence.driver(sequences)
 local function on_event(device, ty, code, value, from_remote)
     local keys_down = KEYS_DOWN[device]
-    if not from_remote and ty == EV_KEY and (
-        (code == R_CTRL and value == 1 and keys_down[L_CTRL] ) or 
-        (code == L_CTRL and value == 1 and keys_down[R_CTRL] ))
-    then
-        if use_remote then
-            use_remote = false
-        else
-            if send_to_remote == nil then
-                send_to_remote = remote.connect(secrets.remote, function()
-                    send_to_remote = nil
-                    use_remote = false
-                end)
-            end
-            use_remote = true
-        end
-    end
-    if use_remote then
-        send_to_remote(ty, code, value)
-        return
-    end
     if ty == EV_KEY then
         keys_down[code] = value ~= 0
     end
@@ -257,38 +234,6 @@ local function on_event(device, ty, code, value, from_remote)
     end
     send_event(ty, code, value)
 end
-
-local separator = string.pack("B", 255)
-function listen_for_connection()
-    local remaining = ""
-    local port = 7431
-    print("listening on port " .. port)
-    diversion.spawn(
-        "nc",
-        { "-l", "-p", tostring(port) },
-        function(data)
-            for block in util.split(remaining .. data, separator) do
-                if block:len() == 6 then
-                    local ty, code, value = string.unpack("HHh", block)
-                    on_event(KEYBOARD, ty, code, value, true)
-                    diversion.send_event(EV_SYN, 0, 0)
-                else
-                    remaining = block
-                end
-            end
-        end,
-        function(data)
-            print(data)
-        end,
-        function(code)
-            local message = "Remote Connection Closed (" .. code .. ")\nRestarting listener in 1s"
-            print(message)
-            util.notify_send(message)
-            execute("sleep", { "1" }):next(listen_for_connection)
-        end
-    )
-end
-listen_for_connection()
 
 diversion.listen(on_event)
 print("started at", os.date("%Y-%m-%d %H:%M:%S"))
