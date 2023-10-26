@@ -143,7 +143,7 @@ OVERRIDES = {
                     send_event(EV_KEY, VOL_UP, value)
                 end
             end,
-            [PAUSE_BREAK] = function(value)
+            [INSERT] = function(value)
                 if KEYS_DOWN[KEYBOARD][L_CTRL] then
                     diversion.reload()
                 else
@@ -188,6 +188,27 @@ OVERRIDES = {
     }
 }
 
+local function swap_keys(device, a, b)
+    local function swap(event)
+        if not OVERRIDES[device] then return end
+        if not OVERRIDES[device][event] then return end
+        local prev_a = OVERRIDES[device][event][a]
+        local prev_b = OVERRIDES[device][event][b]
+        if prev_b ~= nil then
+            OVERRIDES[device][event][a] = prev_b
+        else
+            OVERRIDES[device][event][a] = function(value) send_event(event, b, value) end
+        end
+        if prev_a ~= nil then
+            OVERRIDES[device][event][b] = prev_a
+        else
+            OVERRIDES[device][event][b] = function(value) send_event(event, a, value) end
+        end
+    end
+    swap(EV_KEY)
+    swap(EV_REL)
+end
+
 local vol_up_seq = key_sequence.create({ G, K }, function()
     if KEYS_DOWN[KEYBOARD][L_SHIFT] then
         util.change_sink_volume("Spotify", "+2%")
@@ -210,6 +231,8 @@ end)
 local sequences = {
     [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq },
 }
+
+swap_keys(KEYBOARD, L_SHIFT, L_ALT)
 
 local sequence_driver = key_sequence.driver(sequences)
 local function on_event(device, ty, code, value)
