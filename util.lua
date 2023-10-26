@@ -22,7 +22,7 @@ local function find_sinks()
         local sinks = {}
         local sink = nil
         for line in split(s, '\n') do
-            local s, e = line:find("Sink Input #")
+            local _, e = line:find("Sink Input #")
             if s and e then
                 sink = tonumber(line:sub(e + 1, line:len()))
             end
@@ -39,16 +39,16 @@ local function find_sinks()
     end)
 end
 
-local function change_sink_volume(name, change, sinks)
+local function change_sink_volume(name, change)
     name = string.lower(name)
     return find_sinks():next(function(sinks)
         if sinks[name] then
             local args = { 'set-sink-input-volume', sinks[name], change }
             return execute('pactl', args)
         else
-            for k, v in pairs(sinks) do
+            for k, _ in pairs(sinks) do
                 if string.find(k, name) then
-                    change_sink_volume(k, change, sinks)
+                    change_sink_volume(k, change)
                     return
                 end
             end
@@ -66,7 +66,7 @@ local function slice(src, start, eend)
     return table.move(src, start, eend, 1, {})
 end
 
-function notify_send(msg)
+local function notify_send(msg)
     execute("notify-send", { msg })
 end
 

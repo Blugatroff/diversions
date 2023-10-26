@@ -1,6 +1,7 @@
+---@diagnostic disable: undefined-global
+
 dofile './util.lua'
 dofile './codes.lua'
-local Promise = require 'promise'
 
 local key_sequence = require 'key_sequence'
 local diversion = require 'diversion'
@@ -9,10 +10,10 @@ local util = require 'util'
 local execute = diversion.execute
 local send_event = diversion.send_event
 
-local secrets = nil
+SECRETS = nil
 execute("cat", { "./secrets.lua" }):next(function(output)
     if (output.code == 0) then
-        secrets = require('secrets')
+        SECRETS = require('secrets')
     else
         util.notify_send("failed to read './secrets.lua'")
         diversion.exit()
@@ -21,9 +22,9 @@ end)
 
 KEYS_DOWN = {}
 
-rev_mouse = true
+local rev_mouse = true
 
-function create_mouse_callback(device, key, axis, direction)
+local function create_mouse_callback(device, key, axis, direction)
     return function(value)
         if KEYS_DOWN[device][L_PIPE] then
             if value == 1 or value == 2 then
@@ -211,7 +212,7 @@ local sequences = {
 }
 
 local sequence_driver = key_sequence.driver(sequences)
-local function on_event(device, ty, code, value, from_remote)
+local function on_event(device, ty, code, value)
     local keys_down = KEYS_DOWN[device]
     if ty == EV_KEY then
         keys_down[code] = value ~= 0
