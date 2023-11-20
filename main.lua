@@ -22,7 +22,7 @@ end)
 
 KEYS_DOWN = {}
 
-local rev_mouse = true
+local rev_mouse = false
 
 local function create_mouse_callback(device, key, axis, direction)
     return function(value)
@@ -118,12 +118,6 @@ OVERRIDES = {
             end,
             [L_ALT] = function(value)
                 send_event(EV_KEY, L_ALT, value)
-            end,
-            [ESCAPE] = function(value)
-                send_event(EV_KEY, CAPS_LOCK, value)
-            end,
-            [CAPS_LOCK] = function(value)
-                send_event(EV_KEY, ESCAPE, value)
             end,
             [H] = create_mouse_callback(KEYBOARD, H, X_AXIS, -1),
             [J] = create_mouse_callback(KEYBOARD, J, Y_AXIS, 1),
@@ -232,7 +226,8 @@ local sequences = {
     [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq },
 }
 
-swap_keys(KEYBOARD, L_SHIFT, L_ALT)
+-- swap_keys(KEYBOARD, L_SHIFT, L_ALT)
+swap_keys(KEYBOARD, ESCAPE, CAPS_LOCK)
 
 local sequence_driver = key_sequence.driver(sequences)
 local function on_event(device, ty, code, value)
