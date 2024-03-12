@@ -219,11 +219,17 @@ local vol_down_seq = key_sequence.create({ G, J }, function()
         send_event(EV_KEY, VOL_DOWN, 0)
     end
 end)
+local light_off_seq = key_sequence.create({ G, LT }, function()
+    execute("curl", { "http://deskpi:8000/off" })
+end)
+local light_on_seq = key_sequence.create({ G, GT }, function()
+    execute("curl", { "http://deskpi:8000/on" })
+end)
 local rev_mouse_toggle_seq = key_sequence.create({ R_ALT, R, E }, function()
     rev_mouse = not rev_mouse
 end)
 local sequences = {
-    [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq },
+    [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq, light_off_seq, light_on_seq },
 }
 
 -- swap_keys(KEYBOARD, L_SHIFT, L_ALT)
