@@ -1,4 +1,3 @@
-local diversion = require 'diversion'
 local execute = diversion.execute
 
 local function split(s, pat) -- https://stackoverflow.com/a/1647577

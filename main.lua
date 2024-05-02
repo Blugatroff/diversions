@@ -1,10 +1,8 @@
 ---@diagnostic disable: undefined-global
 
-dofile './util.lua'
-dofile './codes.lua'
+SLASH = 53
 
 local key_sequence = require 'key_sequence'
-local diversion = require 'diversion'
 local util = require 'util'
 
 local execute = diversion.execute
@@ -219,17 +217,28 @@ local vol_down_seq = key_sequence.create({ G, J }, function()
         send_event(EV_KEY, VOL_DOWN, 0)
     end
 end)
+local deskpi = "deskpi"
 local light_off_seq = key_sequence.create({ G, LT }, function()
-    execute("curl", { "http://deskpi:8000/off" })
+    execute("curl", { "http://" .. deskpi .. ":8000/off" })
 end)
 local light_on_seq = key_sequence.create({ G, GT }, function()
-    execute("curl", { "http://deskpi:8000/on" })
+    execute("curl", { "http://" .. deskpi .. ":8000/on" })
 end)
 local rev_mouse_toggle_seq = key_sequence.create({ R_ALT, R, E }, function()
     rev_mouse = not rev_mouse
 end)
+local switch_audio_output_seq = key_sequence.create({ G, SLASH }, (function()
+    local ports = { "analog-output-lineout", "analog-output-headphones" }
+    local current = ports[1]
+    return function()
+        local port = ports[current == ports[1] and 2 or 1]
+        print("switching to " .. port)
+        execute("pactl", { "set-sink-port", "alsa_output.pci-0000_09_00.4.analog-stereo", port }, function(output) print(output.code, output.stderr, output.stdout) end)
+        current = port
+    end
+end)())
 local sequences = {
-    [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq, light_off_seq, light_on_seq },
+    [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq, light_off_seq, light_on_seq, switch_audio_output_seq },
 }
 
 -- swap_keys(KEYBOARD, L_SHIFT, L_ALT)

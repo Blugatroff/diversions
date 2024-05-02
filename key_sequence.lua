@@ -1,4 +1,3 @@
-local diversion = require 'diversion'
 local inspect = require 'inspect'
 local util = require 'util'
 
