@@ -227,6 +227,9 @@ end)
 local rev_mouse_toggle_seq = key_sequence.create({ R_ALT, R, E }, function()
     rev_mouse = not rev_mouse
 end)
+local repeat_command_seq = key_sequence.create({ G, MINUS }, function ()
+    diversion.spawn("nc", { "127.0.0.1", "7821" })("run")
+end)
 local switch_audio_output_seq = key_sequence.create({ G, SLASH }, (function()
     local ports = { "analog-output-lineout", "analog-output-headphones" }
     local current = ports[1]
@@ -238,7 +241,15 @@ local switch_audio_output_seq = key_sequence.create({ G, SLASH }, (function()
     end
 end)())
 local sequences = {
-    [KEYBOARD] = { vol_down_seq, vol_up_seq, rev_mouse_toggle_seq, light_off_seq, light_on_seq, switch_audio_output_seq },
+    [KEYBOARD] = {
+        vol_down_seq,
+        vol_up_seq,
+        rev_mouse_toggle_seq,
+        light_off_seq,
+        light_on_seq,
+        switch_audio_output_seq,
+        repeat_command_seq,
+    },
 }
 
 -- swap_keys(KEYBOARD, L_SHIFT, L_ALT)
