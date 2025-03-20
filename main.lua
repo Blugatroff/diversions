@@ -1,5 +1,3 @@
----@diagnostic disable: undefined-global
-
 SLASH = 53
 
 local key_sequence = require 'key_sequence'
@@ -7,16 +5,6 @@ local util = require 'util'
 
 local execute = diversion.execute
 local send_event = diversion.send_event
-
-SECRETS = nil
-execute("cat", { "./secrets.lua" }):next(function(output)
-    if (output.code == 0) then
-        SECRETS = require('secrets')
-    else
-        util.notify_send("failed to read './secrets.lua'")
-        diversion.exit()
-    end
-end)
 
 KEYS_DOWN = {}
 
@@ -236,7 +224,8 @@ local switch_audio_output_seq = key_sequence.create({ G, SLASH }, (function()
     return function()
         local port = ports[current == ports[1] and 2 or 1]
         print("switching to " .. port)
-        execute("pactl", { "set-sink-port", "alsa_output.pci-0000_09_00.4.analog-stereo", port }, function(output) print(output.code, output.stderr, output.stdout) end)
+        execute("amixer", { "-c", "Generic", "set", "Auto-Mute Mode", "Disabled" }, function(output) print(output.code, output.stderr, output.stdout) end)
+        execute("pactl", { "set-sink-port", "alsa_output.pci-0000_0a_00.4.analog-stereo", port }, function(output) print(output.code, output.stderr, output.stdout) end)
         current = port
     end
 end)())
